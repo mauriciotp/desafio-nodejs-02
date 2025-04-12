@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import { z } from 'zod'
 
 const envSchema = z.object({
@@ -5,7 +6,7 @@ const envSchema = z.object({
   PORT: z.number().default(3333),
 })
 
-const parsedEnv = envSchema.safeParse(envSchema)
+const parsedEnv = envSchema.safeParse(process.env)
 
 if (!parsedEnv.success) {
   console.error(
