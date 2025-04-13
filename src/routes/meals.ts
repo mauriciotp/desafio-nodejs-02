@@ -125,6 +125,37 @@ export async function mealsRoutes(app: FastifyInstance) {
         .set({ name, description, date, isOnDiet })
         .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
 
+      return reply.code(200).send()
+    }
+  )
+
+  app.delete(
+    '/:mealId',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      const deleteMealParamsSchema = z.object({
+        mealId: z.string(),
+      })
+
+      const { mealId } = deleteMealParamsSchema.parse(request.params)
+
+      if (!request.user?.id) {
+        return reply.code(400).send({ message: 'User ID is required' })
+      }
+
+      const [meal] = await db
+        .select()
+        .from(meals)
+        .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
+
+      if (!meal) {
+        return reply.code(404).send({ message: 'Resource not found' })
+      }
+
+      await db
+        .delete(meals)
+        .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
+
       return reply.code(204).send()
     }
   )
