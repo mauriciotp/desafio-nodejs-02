@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { db } from '../db'
@@ -54,4 +54,31 @@ export async function mealsRoutes(app: FastifyInstance) {
 
     return reply.code(200).send(JSON.stringify(userMeals))
   })
+
+  app.get(
+    '/:mealId',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      const getMealByIdParamsSchema = z.object({
+        mealId: z.string(),
+      })
+
+      const { mealId } = getMealByIdParamsSchema.parse(request.params)
+
+      if (!request.user?.id) {
+        return reply.code(400).send({ message: 'User ID is required' })
+      }
+
+      const [meal] = await db
+        .select()
+        .from(meals)
+        .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
+
+      if (!meal) {
+        return reply.code(400).send({ message: 'Resource not found' })
+      }
+
+      return reply.code(200).send(JSON.stringify(meal))
+    }
+  )
 }

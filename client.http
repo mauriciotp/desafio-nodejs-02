@@ -21,6 +21,10 @@ Content-Type: application/json
   "isOnDiet": true
 }
 
-### Get meals by user
+### Get meals by each user
 GET {{baseURL}}/meals
+Content-Type: application/json
+
+### Get meal by meal id and each user
+GET {{baseURL}}/meals/079a2b9e-2cd7-493d-bcdb-cb17b5a42637
 Content-Type: application/json
