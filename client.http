@@ -1,0 +1,22 @@
+### Base URL
+@baseURL = http://localhost:3333
+
+### Create user
+POST {{baseURL}}/users
+Content-Type: application/json
+
+{
+  "name": "Mauricio Pinto",
+  "email": "mauriciop@cpqd.com.br"
+}
+
+### Create meal
+POST {{baseURL}}/meals
+Content-Type: application/json
+
+{
+  "name": "Frango frito",
+  "description": "Frango frito na frigideira",
+  "date": "2025-04-13T01:30:38.286Z",
+  "isOnDiet": true
+}
