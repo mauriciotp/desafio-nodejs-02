@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, count, eq } from 'drizzle-orm'
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { db } from '../db'
@@ -157,6 +157,68 @@ export async function mealsRoutes(app: FastifyInstance) {
         .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
 
       return reply.code(204).send()
+    }
+  )
+
+  app.get(
+    '/metrics',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      if (!request.user?.id) {
+        return reply.code(400).send({ message: 'User ID is required' })
+      }
+
+      const [{ totalMealsCount }] = await db
+        .select({ totalMealsCount: count() })
+        .from(meals)
+        .where(and(eq(meals.userId, request.user.id)))
+
+      const [{ totalMealsOnDietCount }] = await db
+        .select({ totalMealsOnDietCount: count() })
+        .from(meals)
+        .where(and(eq(meals.isOnDiet, true), eq(meals.userId, request.user.id)))
+
+      const [{ totalMealsOutOfDietCount }] = await db
+        .select({ totalMealsOutOfDietCount: count() })
+        .from(meals)
+        .where(
+          and(eq(meals.isOnDiet, false), eq(meals.userId, request.user.id))
+        )
+
+      const totalMeals = await db
+        .select()
+        .from(meals)
+        .where(eq(meals.userId, request.user.id))
+        .orderBy(meals.date)
+
+      const { bestOnDietSequence } = totalMeals.reduce(
+        (acc, meal) => {
+          if (meal.isOnDiet) {
+            acc.currentSequence += 1
+          } else {
+            acc.currentSequence = 0
+          }
+
+          if (acc.currentSequence > acc.bestOnDietSequence) {
+            acc.bestOnDietSequence = acc.currentSequence
+          }
+
+          return acc
+        },
+        {
+          bestOnDietSequence: 0,
+          currentSequence: 0,
+        }
+      )
+
+      return reply.code(200).send(
+        JSON.stringify({
+          totalMealsCount,
+          totalMealsOnDietCount,
+          totalMealsOutOfDietCount,
+          bestOnDietSequence,
+        })
+      )
     }
   )
 }

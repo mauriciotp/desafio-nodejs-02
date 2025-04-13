@@ -15,10 +15,10 @@ POST {{baseURL}}/meals
 Content-Type: application/json
 
 {
-  "name": "Frango frito",
+  "name": "Frango na chapa",
   "description": "Frango frito na frigideira",
   "date": "2025-04-13T01:30:38.286Z",
-  "isOnDiet": true
+  "isOnDiet": false
 }
 
 ### Get meals by each user
@@ -40,3 +40,6 @@ Content-Type: application/json
 
 ### Delete meal
 DELETE {{baseURL}}/meals/079a2b9e-2cd7-493d-bcdb-cb17b5a42637
+
+### Get metrics
+GET {{baseURL}}/meals/metrics
