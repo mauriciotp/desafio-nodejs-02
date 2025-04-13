@@ -28,3 +28,14 @@ Content-Type: application/json
 ### Get meal by meal id and each user
 GET {{baseURL}}/meals/079a2b9e-2cd7-493d-bcdb-cb17b5a42637
 Content-Type: application/json
+
+### Edit meal
+PATCH {{baseURL}}/meals/079a2b9e-2cd7-493d-bcdb-cb17b5a42637
+Content-Type: application/json
+
+{
+  "name": "Whey protein",
+  "description": "Fazer uma vitamina",
+  "date": "2025-04-14T01:30:38.286Z",
+  "isOnDiet": true
+}

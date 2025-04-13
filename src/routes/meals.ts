@@ -75,10 +75,57 @@ export async function mealsRoutes(app: FastifyInstance) {
         .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
 
       if (!meal) {
-        return reply.code(400).send({ message: 'Resource not found' })
+        return reply.code(404).send({ message: 'Resource not found' })
       }
 
       return reply.code(200).send(JSON.stringify(meal))
+    }
+  )
+
+  app.patch(
+    '/:mealId',
+    { preHandler: checkSessionIdExists },
+    async (request, reply) => {
+      const editMealParamsSchema = z.object({
+        mealId: z.string(),
+      })
+
+      const editMealBodySchema = z.object({
+        name: z.string().optional(),
+        description: z.string().optional(),
+        date: z
+          .string()
+          .datetime({ offset: true })
+          .transform(value => new Date(value))
+          .optional(),
+        isOnDiet: z.boolean().optional(),
+      })
+
+      if (!request.user?.id) {
+        return reply.code(400).send({ message: 'User ID is required' })
+      }
+
+      const { mealId } = editMealParamsSchema.parse(request.params)
+
+      const { name, description, date, isOnDiet } = editMealBodySchema.parse(
+        request.body
+      )
+
+      const [meal] = await db
+        .select()
+        .from(meals)
+        .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
+
+      if (!meal) {
+        return reply.code(404).send({ message: 'Resource not found' })
+      }
+
+      await db
+        .update(meals)
+        .set({ name, description, date, isOnDiet })
+        .where(and(eq(meals.id, mealId), eq(meals.userId, request.user.id)))
+
+      return reply.code(204).send()
     }
   )
 }
