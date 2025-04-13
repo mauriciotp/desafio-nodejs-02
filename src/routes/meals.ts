@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { db } from '../db'
@@ -40,4 +41,17 @@ export async function mealsRoutes(app: FastifyInstance) {
       return reply.code(201).send()
     }
   )
+
+  app.get('/', { preHandler: checkSessionIdExists }, async (request, reply) => {
+    if (!request.user?.id) {
+      return reply.code(400).send({ message: 'User ID is required' })
+    }
+
+    const userMeals = await db
+      .select()
+      .from(meals)
+      .where(eq(meals.userId, request.user.id))
+
+    return reply.code(200).send(JSON.stringify(userMeals))
+  })
 }

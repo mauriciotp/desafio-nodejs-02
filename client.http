@@ -20,3 +20,7 @@ Content-Type: application/json
   "date": "2025-04-13T01:30:38.286Z",
   "isOnDiet": true
 }
+
+### Get meals by user
+GET {{baseURL}}/meals
+Content-Type: application/json
